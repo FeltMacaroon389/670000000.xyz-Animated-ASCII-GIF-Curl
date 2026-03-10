@@ -1,0 +1,7 @@
+{
+  "name": "670000000.xyz-ascii-gif",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
