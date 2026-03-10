@@ -1,37 +1,63 @@
-const fs = require("fs")
 const http = require("http")
+const fs = require("fs")
+const path = require("path")
 
 const frames = fs.readdirSync("./ascii")
   .sort()
   .map(f => fs.readFileSync("./ascii/" + f, "utf8"))
 
+const mime = {
+  ".html": "text/html",
+  ".jpg": "image/jpeg",
+  ".gif": "image/gif"
+}
+
 http.createServer((req, res) => {
 
   const ua = req.headers["user-agent"] || ""
+  const isCurl = ua.includes("curl")
 
-  // browser response
-  if (!ua.includes("curl")) {
-    res.writeHead(200, {"Content-Type":"text/html"})
-    res.end(`
-	  <!DOCTYPE html>
-      <html>
-      <body>
-      <h1>67 :D</h1>
-      </body>
-      </html>
-    `)
+  // curl, ASCII animation
+  if (isCurl) {
+
+    res.writeHead(200, {"Content-Type": "text/plain"})
+
+    res.write("\x1b[2J")
+    res.write("\x1b[H")
+
+    let i = 0
+
+    setInterval(() => {
+      res.write("\x1b[H")
+      res.write(frames[i])
+      i = (i + 1) % frames.length
+    }, 80)
+
     return
   }
 
-  // curl response
-  res.writeHead(200, {"Content-Type":"text/plain"})
+  // browser, static files
+  let filePath = path.join("public", req.url)
 
-  let i = 0
+  if (req.url === "/") {
+    filePath = "public/index.html"
+  }
 
-  setInterval(() => {
-    res.write("\x1b[H")        // move cursor to top
-    res.write(frames[i])
-    i = (i + 1) % frames.length
-  }, 80)
+  fs.readFile(filePath, (err, data) => {
+
+    if (err) {
+      res.writeHead(404)
+      res.end("Not found")
+      return
+    }
+
+    const ext = path.extname(filePath)
+
+    res.writeHead(200, {
+      "Content-Type": mime[ext] || "text/plain"
+    })
+
+    res.end(data)
+  })
 
 }).listen(process.env.PORT || 3000)
