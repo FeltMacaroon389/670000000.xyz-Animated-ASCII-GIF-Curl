@@ -7,7 +7,7 @@ const frames = fs.readdirSync("./ascii")
   .map(f => fs.readFileSync("./ascii/" + f, "utf8"))
 
 const mime = {
-  ".html": "text/html",
+  ".html": "text/html; charset=utf-8",
   ".jpg": "image/jpeg",
   ".gif": "image/gif"
 }
@@ -54,7 +54,7 @@ http.createServer((req, res) => {
     const ext = path.extname(filePath)
 
     res.writeHead(200, {
-      "Content-Type": mime[ext] || "text/plain"
+      "Content-Type": mime[ext] || "text/plain; charset=utf-8"
     })
 
     res.end(data)
