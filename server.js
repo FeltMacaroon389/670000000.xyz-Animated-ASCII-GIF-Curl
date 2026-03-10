@@ -46,9 +46,7 @@ http.createServer((req, res) => {
   fs.readFile(filePath, (err, data) => {
 
     if (err) {
-      res.writeHead(404)
-      res.end("Not found")
-      return
+		filePath = "public/index.html"
     }
 
     const ext = path.extname(filePath)
